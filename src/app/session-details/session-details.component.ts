@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { Point } from 'src/models/Point';
 import { Wave } from 'src/models/Wave';
 
+//https://github.com/elfalem/Leaflet.curve
+
 @Component({
   selector: 'app-session-details',
   templateUrl: './session-details.component.html',
@@ -17,10 +19,11 @@ export class SessionDetailsComponent implements OnInit {
   waves: Wave[] = []
 
   waveMaxSpeedThresholdKmH: number = 40
-  waveMinSpeedThresholdKmH: number = 9
+  waveMinSpeedThresholdKmH: number = 8
   waveMinDistanceThresholdMeters: number = 6
-  waveMinTimeThresholdSeconds: number = 6
+  waveMinTimeThresholdSeconds: number = 5
   waveMinPointsThreshold: number = 3
+  waveMaxDistanceOfPointFromPrevPointThresholdMeters: number = 8
 
   constructor(private httpClient: HttpClient) { }
 
@@ -40,39 +43,41 @@ export class SessionDetailsComponent implements OnInit {
 
       this.calculateDistanceAndSpeed()
 
+      //clean ussless points with 0 distance
       this.points.forEach(p => {
-
         if (p.distanceKmFromPrevPoiint * 1000 == 0) {
           const index = this.points.indexOf(p, 0);
           if (index > -1) {
             this.points.splice(index, 1);
           }
         }
-
       })
+
       this.calculateDistanceAndSpeed();
 
       // this.points.forEach(p => {
       //   console.log('dist m: ' + p.distanceKm * 1000 + '; timeSeconds: ' + p.milliseconds / 1000 + '; speedKmH: ' + p.speedKmh)
       // })
+
       this.findWaves();
       console.log(this.waves);
+      this.drawWaves()
+    })
+  }
 
-      this.waves.forEach(w => {
-        var pointList: L.LatLng[] = [];
+  private drawWaves() {
+    this.waves.forEach(w => {
+      var pointList: L.LatLng[] = [];
 
-        w.points.forEach(p => {
-          var latLon = new L.LatLng(p.lat, p.lon);
-          pointList.push(latLon)
-        })
-
-        var polyline = new L.Polyline(pointList, {
-          color: this.getRandomColor()
-        });
-        polyline.addTo(this.map as L.Map);
+      w.points.forEach(p => {
+        var latLon = new L.LatLng(p.lat, p.lon);
+        pointList.push(latLon)
       })
 
-
+      var polyline = new L.Polyline(pointList, {
+        color: this.getRandomColor()
+      });
+      polyline.addTo(this.map as L.Map);
     })
   }
 
@@ -109,11 +114,18 @@ export class SessionDetailsComponent implements OnInit {
     let accumulatePoints: Point[] = [];
     let accumulatedTimeSeconds = 0;
 
-    this.points.forEach(p => {
+    this.points.forEach((p, i) => {
 
       if (p.speedKmhFromPrevToThisPoint >= this.waveMinSpeedThresholdKmH
         &&
-        p.speedKmhFromPrevToThisPoint <= this.waveMaxSpeedThresholdKmH) {
+        p.speedKmhFromPrevToThisPoint <= this.waveMaxSpeedThresholdKmH
+        &&
+        p.distanceKmFromPrevPoiint * 1000 <= this.waveMaxDistanceOfPointFromPrevPointThresholdMeters) {
+
+        //add start point
+        if (accumulatePoints.length == 0)
+          accumulatePoints.push(this.points[i - 1]);
+
         accumulatePoints.push(p);
         accumulatedTimeSeconds += p.millisecondsFomPrevPoint / 1000
       }
@@ -121,7 +133,9 @@ export class SessionDetailsComponent implements OnInit {
         &&
         accumulatedTimeSeconds >= this.waveMinTimeThresholdSeconds
         &&
-        accumulatePoints.length >= this.waveMinPointsThreshold) {
+        accumulatePoints.length + 1 >= this.waveMinPointsThreshold) {
+        //add last point
+        accumulatePoints.push(p);
         this.waves.push(new Wave(accumulatePoints));
         accumulatePoints = [];
         accumulatedTimeSeconds = 0;
