@@ -1,12 +1,14 @@
 import { SessionService } from './../services/session.service';
 import { Component, OnInit } from '@angular/core';
 import * as L from 'leaflet';
-import { Point } from 'src/models/Point';
 import { Wave } from 'src/models/Wave';
-import { Session } from 'src/models/Session';
+import '@elfalem/leaflet-curve'
 
-//https://github.com/elfalem/Leaflet.curve
-
+//https://leafletjs.com/plugins.html#heatmaps
+// https://github.com/mpetazzoni/leaflet-gpx
+//https://github.com/elfalem/Leaflet.curve // how to use curves right?
+//https://github.com/Oliv/leaflet-polycolor // polycolor
+//https://github.com/Igor-Vladyka/leaflet.motion TODO use map like this
 @Component({
   selector: 'app-session-details',
   templateUrl: './session-details.component.html',
@@ -20,7 +22,7 @@ export class SessionDetailsComponent implements OnInit {
   ngOnInit(): void {
 
     this.sessionService.getSession('1').then(session => {
-      this.createMap(session.center);
+      this.createMap(session.location);
       this.drawWaves(session.waves);
     });
   }
@@ -34,10 +36,48 @@ export class SessionDetailsComponent implements OnInit {
         pointList.push(latLon)
       })
 
-      var polyline = new L.Polyline(pointList, {
-        color: this.getRandomColor()
-      });
+      var polyline =
+
+        // TODO use curves to beutify waves
+        // L.curve(['M', [pointList[0].lat, pointList[0].lng],
+        //   'C', [pointList[1].lat, pointList[1].lng],
+        //   [pointList[2].lat, pointList[2].lng],
+        //   [pointList[3].lat, pointList[3].lng]
+        // [48.45835188280866, 33.57421875000001],
+        // [50.680797145321655, 33.83789062500001],
+        // ],
+        //   { color: 'red', fill: false })
+
+        new L.Polyline(pointList,
+          {
+            color: this.getRandomColor()
+          });
+
+
       polyline.addTo(this.map as L.Map);
+
+      //prin each point
+      pointList.forEach(i => L.circle(i, 0.01,
+        {
+          color: 'green'
+        }
+      ).addTo(this.map as L.Map));
+
+      //prin each point
+      L.circle(pointList[0], 0.01,
+        {
+          color: 'blue'
+        }
+      ).addTo(this.map as L.Map);
+
+      L.circle(pointList[pointList.length - 1], 0.01,
+        {
+          color: 'blue'
+        }
+      ).addTo(this.map as L.Map);
+
+      // polyline.trace([0, 1]).forEach(i => L.circle(i, { color: 'green' }).addTo(this.map as L.Map));
+
     })
   }
 
@@ -55,9 +95,12 @@ export class SessionDetailsComponent implements OnInit {
     );
 
     L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-      maxZoom: 100,
+      maxZoom: 20,
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     }).addTo(map);
+
+    // L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    // }).addTo(map);
 
     this.map = map
   }

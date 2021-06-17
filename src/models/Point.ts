@@ -6,7 +6,7 @@ export class Point {
   date: Date
 
   millisecondsFomPrevPoint: number = -1 //time between this and previous point
-  distanceKmFromPrevPoiint: number = -1 //distance between this and previous point
+  distanceKmFromPrevPoint: number = -1 //distance between this and previous point
   speedKmhFromPrevToThisPoint: number = -1 // speed between this and previous point
 
 
@@ -16,7 +16,7 @@ export class Point {
     this.date = date
   }
 
-  getDistanceInKm(prevPoint: Point) {
+  calculateDistanceInKm(prevPoint: Point): number {
     var R = 6371; // Radius of the earth in km
     var dLat = this.deg2rad(this.lat - prevPoint.lat);  // deg2rad below
     var dLon = this.deg2rad(this.lon - prevPoint.lon);
@@ -25,12 +25,14 @@ export class Point {
       Math.cos(this.deg2rad(prevPoint.lat)) * Math.cos(this.deg2rad(this.lat)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c; // Distance in km
-    this.distanceKmFromPrevPoiint = d
+    return d
   }
 
-  getSpeedInKmh(prevPoint: Point) {
-    this.millisecondsFomPrevPoint = (this.date.getTime() - prevPoint.date.getTime())
-    this.speedKmhFromPrevToThisPoint = this.distanceKmFromPrevPoiint / (this.millisecondsFomPrevPoint / 1000 / 60 / 60)
+  getSpeedInKmh(prevPoint: Point): { millisecondsFomPrevPoint: number, speedKmhFromPrevToThisPoint: number } {
+    return {
+      millisecondsFomPrevPoint: this.date.getTime() - prevPoint.date.getTime(),
+      speedKmhFromPrevToThisPoint: this.distanceKmFromPrevPoint / (this.millisecondsFomPrevPoint / 1000 / 60 / 60)
+    }
   }
 
   private deg2rad(deg: number) {

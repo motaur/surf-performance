@@ -12,13 +12,6 @@ import { catchError, map, tap } from 'rxjs/operators';
 })
 export class SessionService {
 
-  waveMaxSpeedThresholdKmH: number = 40
-  waveMinSpeedThresholdKmH: number = 8
-  waveMinDistanceThresholdMeters: number = 6
-  waveMinTimeThresholdSeconds: number = 5
-  waveMinPointsThreshold: number = 3
-  waveMaxDistanceOfPointFromPrevPointThresholdMeters: number = 8
-
   constructor(private httpClient: HttpClient) { }
 
   async getSession(sessionId: string): Promise<Session> {
@@ -37,9 +30,9 @@ export class SessionService {
     });
 
     let calulatedPoints = this.calculateDistanceAndSpeed(points);
-    let waves: Wave[] = this.findWaves(calulatedPoints);
-
-    return new Session(waves)
+    let session = new Session(calulatedPoints)
+    console.log(session)
+    return session
   }
 
   private calculateDistanceAndSpeed(points: Point[]): Point[] {
@@ -50,12 +43,16 @@ export class SessionService {
     // })
 
     for (var i = 1; i < points.length; i++) {
-      points[i].getDistanceInKm(points[i - 1]);
-      points[i].getSpeedInKmh(points[i - 1]);
+
+      let calculatedPeedAndTime = points[i].getSpeedInKmh(points[i - 1])
+
+      points[i].distanceKmFromPrevPoint = points[i].calculateDistanceInKm(points[i - 1]);
+      points[i].millisecondsFomPrevPoint = calculatedPeedAndTime.millisecondsFomPrevPoint;
+      points[i].speedKmhFromPrevToThisPoint = calculatedPeedAndTime.speedKmhFromPrevToThisPoint;
     }
     //clean ussless points with 0 distance
     points.forEach(p => {
-      if (p.distanceKmFromPrevPoiint * 1000 == 0) {
+      if (p.distanceKmFromPrevPoint * 1000 == 0) {
         const index = points.indexOf(p, 0);
         if (index > -1) {
           points.splice(index, 1);
@@ -64,8 +61,11 @@ export class SessionService {
     })
     //calulate again withou usless this.points
     for (var i = 1; i < points.length; i++) {
-      points[i].getDistanceInKm(points[i - 1]);
-      points[i].getSpeedInKmh(points[i - 1]);
+      let calculatedPeedAndTime = points[i].getSpeedInKmh(points[i - 1])
+
+      points[i].distanceKmFromPrevPoint = points[i].calculateDistanceInKm(points[i - 1]);
+      points[i].millisecondsFomPrevPoint = calculatedPeedAndTime.millisecondsFomPrevPoint;
+      points[i].speedKmhFromPrevToThisPoint = calculatedPeedAndTime.speedKmhFromPrevToThisPoint;
     }
 
     //print points
@@ -76,51 +76,5 @@ export class SessionService {
     return points
   }
 
-  private findWaves(points: Point[]): Wave[] {
-    let waves: Wave[] = []
-    let accumulatePoints: Point[] = [];
-    let accumulatedTimeSeconds = 0;
 
-    points.forEach((p, i) => {
-
-      if (p.speedKmhFromPrevToThisPoint >= this.waveMinSpeedThresholdKmH
-        &&
-        p.speedKmhFromPrevToThisPoint <= this.waveMaxSpeedThresholdKmH
-        &&
-        p.distanceKmFromPrevPoiint * 1000 <= this.waveMaxDistanceOfPointFromPrevPointThresholdMeters) {
-
-        //add start point
-        if (accumulatePoints.length == 0)
-          accumulatePoints.push(points[i - 1]);
-
-        accumulatePoints.push(p);
-        accumulatedTimeSeconds += p.millisecondsFomPrevPoint / 1000
-      }
-      else if (this.getSumDistanceKm(accumulatePoints) * 1000 >= this.waveMinDistanceThresholdMeters
-        &&
-        accumulatedTimeSeconds >= this.waveMinTimeThresholdSeconds
-        &&
-        accumulatePoints.length + 1 >= this.waveMinPointsThreshold) {
-        //add last point
-        accumulatePoints.push(p);
-        waves.push(new Wave(accumulatePoints));
-        accumulatePoints = [];
-        accumulatedTimeSeconds = 0;
-      }
-      else {
-        accumulatePoints = [];
-        accumulatedTimeSeconds = 0;
-      }
-    })
-    console.log(waves);
-    return waves;
-  }
-
-  private getSumDistanceKm(points: Point[]): number {
-    let distance: number = 0
-    points.forEach(p => {
-      distance += p.distanceKmFromPrevPoiint
-    })
-    return distance
-  }
 }
