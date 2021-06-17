@@ -5,10 +5,10 @@ import { Wave } from 'src/models/Wave';
 import '@elfalem/leaflet-curve'
 
 //https://leafletjs.com/plugins.html#heatmaps
-// https://github.com/mpetazzoni/leaflet-gpx
-//https://github.com/elfalem/Leaflet.curve // how to use curves right?
-//https://github.com/Oliv/leaflet-polycolor // polycolor
-//https://github.com/Igor-Vladyka/leaflet.motion TODO use map like this
+//https://github.com/mpetazzoni/leaflet-gpx
+//https://github.com/elfalem/Leaflet.curve
+//https://github.com/Oliv/leaflet-polycolor
+//https://github.com/Igor-Vladyka/leaflet.motion
 @Component({
   selector: 'app-session-details',
   templateUrl: './session-details.component.html',
