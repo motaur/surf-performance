@@ -1,11 +1,12 @@
+
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import gpxParser from 'gpxparser';
+import { Point as ParserPoint } from 'gpxparser';
+import GpxParser from 'gpxparser';
 import { Point } from 'src/models/Point';
 import { Session } from 'src/models/Session';
-import { Wave } from 'src/models/Wave';
-import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import FitParser, { Activity } from 'fit-file-parser';
+
 
 @Injectable({
   providedIn: 'root'
@@ -14,18 +15,21 @@ export class SessionService {
 
   constructor(private httpClient: HttpClient) { }
 
-  async getSession(sessionId: string): Promise<Session> {
+  async getGpxSession(sessionId: string): Promise<Session> {
 
     let response = await this.httpClient
       .get(/*sessionId */ "../../assets/gpx_1.gpx", { responseType: "text" })
       .toPromise();
 
-    const parser = new gpxParser();
+    const parser: GpxParser = new GpxParser();
     parser.parse(response);
 
     let points: Point[] = []
 
-    parser.tracks[0].points.forEach((p: { lat: number; lon: number; time: Date; }) => {
+    console.log
+
+    parser.tracks[0].points.forEach((p: ParserPoint) => {
+
       points.push(new Point(p.lat, p.lon, p.time))
     });
 
@@ -33,6 +37,46 @@ export class SessionService {
     let session = new Session(calulatedPoints)
     console.log(session)
     return session
+  }
+
+  async getFitSession(sessionId: string)//: Promise<Session>
+  {
+    let response: ArrayBuffer = await this.httpClient
+      .get(/*sessionId */ "../../assets/6903482603_ACTIVITY.fit", { responseType: 'arraybuffer' })
+      .toPromise();
+
+    var parser = new FitParser({
+      force: true,
+      speedUnit: 'km/h',
+      lengthUnit: 'km',
+      temperatureUnit: 'celsius',
+      elapsedRecordField: true,
+      mode: 'list'
+    });
+
+    parser.parse(Buffer.from(response), function (error, data: Activity) {
+      // Handle result of parse method
+      if (error) {
+        console.log(error);
+      } else {
+        console.log((data));
+      }
+    });
+
+
+
+
+
+    // let points: Point[] = []
+
+    // tracks[0].points.forEach((p: { lat: number; lon: number; time: Date; }) => {
+    //   points.push(new Point(p.lat, p.lon, p.time))
+    // });
+
+    // let calulatedPoints = this.calculateDistanceAndSpeed(points);
+    // let session = new Session(calulatedPoints)
+    // console.log(session)
+    // return session
   }
 
   private calculateDistanceAndSpeed(points: Point[]): Point[] {
@@ -75,6 +119,4 @@ export class SessionService {
 
     return points
   }
-
-
 }
