@@ -1,3 +1,4 @@
+import { GarminService } from './../services/garmin.service';
 import { SessionService } from './../services/session.service';
 import { Component, OnInit } from '@angular/core';
 import * as L from 'leaflet';
@@ -17,11 +18,15 @@ import '@elfalem/leaflet-curve'
 export class SessionDetailsComponent implements OnInit {
 
   map: L.Map | null = null
-  constructor(private sessionService: SessionService) { }
+  constructor(private sessionService: SessionService, private garminService: GarminService) { }
 
   ngOnInit(): void {
 
-    this.sessionService.getSession('1').then(session => {
+    // dxthis.garminService.login()
+
+    this.sessionService.getFitSession("1")
+
+    this.sessionService.getGpxSession('1').then(session => {
       this.createMap(session.location);
       this.drawWaves(session.waves);
     });
@@ -59,6 +64,7 @@ export class SessionDetailsComponent implements OnInit {
       //prin each point
       pointList.forEach(i => L.circle(i, 0.01,
         {
+          stroke: true,
           color: 'green'
         }
       ).addTo(this.map as L.Map));

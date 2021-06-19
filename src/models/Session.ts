@@ -8,7 +8,7 @@ export class Session {
   private waveMinDistanceThresholdMeters: number = 8
   private waveMinTimeThresholdSeconds: number = 5
   private waveMinPointsThreshold: number = 5
-  private waveMinTimeBetweenPointsSeconds: number = 2
+  private waveMinTimeBetweenPointsSeconds: number = 3
   private waveRelationRatioBetweenStraightDistanceAndFullDistance: number = 0.6
 
   //replaced by time betwwen points
@@ -23,15 +23,14 @@ export class Session {
   startTime: Date
   endTime: Date
   paceWavesPerHour: number
-  sumWavesDistance: number = 0
-
+  sumWavesDistanceMeters: number = 0
 
   constructor(points: Point[]) {
     this.startTime = points[0].date
     this.endTime = points[points.length - 1].date
     this.lengthMinutes = (this.endTime.getTime() - this.startTime.getTime()) / 1000 / 60
     this.waves = this.findWaves(points)
-    this.waves.forEach(w => this.sumWavesDistance += w.distanceMeters)
+    this.waves.forEach(w => this.sumWavesDistanceMeters += w.distanceMeters)
     this.paceWavesPerHour = this.waves.length / (this.lengthMinutes / 60)
     this.location[0] = this.waves[0]?.points[0]?.lat
     this.location[1] = this.waves[0]?.points[0].lon

@@ -1,21 +1,27 @@
 export class Point {
 
   //Fields
-  lat: number
-  lon: number
-  date: Date
+  lat: number;
+  lon: number;
+  date: Date;
+  heartRate: number = -1;
+  temp: number = -1;
 
   millisecondsFomPrevPoint: number = -1 //time between this and previous point
   distanceKmFromPrevPoint: number = -1 //distance between this and previous point
   speedKmhFromPrevToThisPoint: number = -1 // speed between this and previous point
 
-
   constructor(lat: number, lon: number, date: Date) {
-    this.lat = lat
-    this.lon = lon
-    this.date = date
+    this.lat = lat;
+    this.lon = lon;
+    this.date = date;
   }
 
+  /**
+   *
+   * @param prevPoint previous point or any other point
+   * @returns distance in km between this point and prevPoint
+   */
   calculateDistanceInKm(prevPoint: Point): number {
     var R = 6371; // Radius of the earth in km
     var dLat = this.deg2rad(this.lat - prevPoint.lat);  // deg2rad below
@@ -28,6 +34,11 @@ export class Point {
     return d
   }
 
+  /**
+   *
+   * @param prevPoint previous point or any other point
+   * @returns speed between this point and prevPoint
+   */
   getSpeedInKmh(prevPoint: Point): { millisecondsFomPrevPoint: number, speedKmhFromPrevToThisPoint: number } {
     return {
       millisecondsFomPrevPoint: this.date.getTime() - prevPoint.date.getTime(),
