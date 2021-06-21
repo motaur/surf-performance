@@ -1,4 +1,3 @@
-import { GarminService } from './../services/garmin.service';
 import { SessionService } from './../services/session.service';
 import { Component, OnInit } from '@angular/core';
 import * as L from 'leaflet';
@@ -18,7 +17,7 @@ import '@elfalem/leaflet-curve'
 export class SessionDetailsComponent implements OnInit {
 
   map: L.Map | null = null
-  constructor(private sessionService: SessionService, private garminService: GarminService) { }
+  constructor(private sessionService: SessionService) { }
 
   ngOnInit(): void {
 
@@ -110,46 +109,6 @@ export class SessionDetailsComponent implements OnInit {
 
     this.map = map
   }
-
-
-  // readFile(file: File) {
-  //   var reader = new FileReader();
-  //   reader.onload = () => {
-  //     console.log(reader.result);
-
-  //   };
-  //   reader.readAsText(file);
-  // }
-
-  // loadFile() {
-
-  //   const points = []
-
-  //   let gpxdata: any
-
-  //   try {
-
-  //     fs.readFile(path.join(__dirname, '../../assests/gpx_1.gpx'), 'utf8', (error, data: any) => {
-  //       gpxdata = data
-  //     })
-
-  //     const parser = new gpxParser()
-  //     parser.parse(gpxdata)
-
-  //     console.log(gpxdata)
-
-  //     parser.tracks.forEach((track: { points: { time: any; }[]; }) => {
-  //       track.points.forEach((point: { time: any; }) => {
-  //         points.push({ ...point, time: point.time ?? new Date() })
-  //       })
-  //     })
-
-  //   } catch (err) {
-  //     console.error(err)
-  //   }
-
-
-
 
   //   // var gpxFile = '../assets/gpx_1.gpx'; // URL to your GPX file or the GPX itself
 

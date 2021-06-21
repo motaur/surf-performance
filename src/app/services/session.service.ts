@@ -26,9 +26,10 @@ export class SessionService {
 
     let points: Point[] = []
 
-    console.log
+    // https://github.com/sports-alliance/sports-lib check this lib to use
 
     parser.tracks[0].points.forEach((p: ParserPoint) => {
+      //todo add hr, temperature and altitude parsing as extras
 
       points.push(new Point(p.lat, p.lon, p.time))
     });
@@ -60,6 +61,10 @@ export class SessionService {
         console.log(error);
       } else {
         console.log((data));
+        data.records.forEach(r => {
+
+        })
+
       }
     });
 
