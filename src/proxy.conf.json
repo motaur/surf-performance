@@ -1,0 +1,8 @@
+{
+  "*": {
+      "target": "https://garmin.com/",
+      "secure": false,
+      "logLevel": "debug"
+  }
+}
+
