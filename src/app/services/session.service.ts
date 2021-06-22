@@ -6,25 +6,24 @@ import GpxParser from 'gpxparser';
 import { Point } from 'src/models/Point';
 import { Session } from 'src/models/Session';
 import FitParser, { Activity } from 'fit-file-parser';
-import { GarminApi } from "garmin-api-handler"
+// import { GarminApi } from "garmin-api-handler"
 import { garminLogin, garminPassword } from 'src/cred';
 
 // https://github.com/fabulator/garmin-api-handler/blob/master/src/GarminApi.ts
 // https://github.com/sports-alliance/sports-lib
+// https://github.com/Pythe1337N/garmin-connect
 @Injectable({
   providedIn: 'root'
 })
 export class SessionService {
 
-  constructor(private httpClient: HttpClient) {
-    this.garminApi()
-  }
+  constructor(private httpClient: HttpClient) { }
 
   async garminApi() {
-    let api = new GarminApi()
-    await api.login(garminLogin, garminPassword).then(response => {
-      console.log(response)
-    })
+    // let api = new GarminApi()
+    // await api.login(garminLogin, garminPassword).then(response => {
+    //   console.log(response)
+    // })
   }
 
   async getGpxSession(sessionId: string): Promise<Session> {
