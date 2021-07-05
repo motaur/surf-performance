@@ -1,0 +1,26 @@
+<table>
+	<thead>
+		<tr>
+			<!-- <th>Where</th>
+			<th>When</th>
+			<th>How long</th>
+      <th>Actions</th> -->
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr *ngFor="let session of sessions">
+      <td>id: {{session.id}}</td>
+	    <td>time: {{session.date}}</td>
+      <td>format: {{session.format}}</td>
+      <td>
+         <button (click)="setSessionId(session.id)">details</button>
+      </td>
+		</tr>
+	</tbody>
+</table>
+
+<br>
+<br>
+
+<app-session-details *ngIf="getSessionId()" [sessionId]='getSessionId()'></app-session-details>

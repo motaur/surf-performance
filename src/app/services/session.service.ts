@@ -1,5 +1,5 @@
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Point as ParserPoint } from 'gpxparser';
 import GpxParser from 'gpxparser';
@@ -8,6 +8,8 @@ import { Session } from 'src/models/Session';
 import FitParser, { Activity } from 'fit-file-parser';
 // import { GarminApi } from "garmin-api-handler"
 import { garminLogin, garminPassword } from 'src/cred';
+import { triggerAsyncId } from 'async_hooks';
+import { Observable } from 'rxjs';
 
 // https://github.com/fabulator/garmin-api-handler/blob/master/src/GarminApi.ts
 // https://github.com/sports-alliance/sports-lib
@@ -17,13 +19,24 @@ import { garminLogin, garminPassword } from 'src/cred';
 })
 export class SessionService {
 
+  private url = 'http://localhost:5000/'
+  private login = 'activities'
+
   constructor(private httpClient: HttpClient) { }
 
-  async garminApi() {
-    // let api = new GarminApi()
-    // await api.login(garminLogin, garminPassword).then(response => {
-    //   console.log(response)
-    // })
+  async backupGarmin(login: string, password: string) {
+    let response = await this.httpClient
+      .post(this.url, { login, password })
+      .toPromise()
+    return response
+  }
+
+  getDownloadedSessions(): Observable<any> {
+    return this.httpClient.get(this.url + 'get_activities?login=' + this.login)
+  }
+
+  garminConnect(login: string, password: string) {
+
   }
 
   async getGpxSession(sessionId: string): Promise<Session> {
@@ -37,11 +50,8 @@ export class SessionService {
 
     let points: Point[] = []
 
-
-
     parser.tracks[0].points.forEach((p: ParserPoint) => {
       //todo add hr, temperature and altitude parsing as extras
-
       points.push(new Point(p.lat, p.lon, p.time))
     });
 
@@ -51,10 +61,9 @@ export class SessionService {
     return session
   }
 
-  async getFitSession(sessionId: string)//: Promise<Session>
-  {
+  async getFitSession(sessionId: string): Promise<Session> {
     let response: ArrayBuffer = await this.httpClient
-      .get(/*sessionId */ "../../assets/6903482603_ACTIVITY.fit", { responseType: 'arraybuffer' })
+      .get(this.url + `/get_activity_file?login=activities&id=${sessionId}`, { responseType: 'arraybuffer' })
       .toPromise();
 
     var parser = new FitParser({
@@ -66,33 +75,26 @@ export class SessionService {
       mode: 'list'
     });
 
+    let points: Point[] = []
+    // TODO if activity type == Surfing, not need to find waves, just filter points that not containts lat lon,
     parser.parse(Buffer.from(response), function (error, data: Activity) {
       // Handle result of parse method
       if (error) {
         console.log(error);
       } else {
-        console.log((data));
         data.records.forEach(r => {
-
-        })
-
+          let p = new Point(r.position_lat, r.position_long, r.timestamp);
+          p.heartRate = r.heart_rate;
+          p.temp = r.temperature
+          points.push(p)
+        });
       }
     });
 
-
-
-
-
-    // let points: Point[] = []
-
-    // tracks[0].points.forEach((p: { lat: number; lon: number; time: Date; }) => {
-    //   points.push(new Point(p.lat, p.lon, p.time))
-    // });
-
-    // let calulatedPoints = this.calculateDistanceAndSpeed(points);
-    // let session = new Session(calulatedPoints)
-    // console.log(session)
-    // return session
+    let calulatedPoints = this.calculateDistanceAndSpeed(points);
+    let session = new Session(calulatedPoints)
+    console.log(session)
+    return session
   }
 
   private calculateDistanceAndSpeed(points: Point[]): Point[] {
@@ -136,3 +138,5 @@ export class SessionService {
     return points
   }
 }
+
+

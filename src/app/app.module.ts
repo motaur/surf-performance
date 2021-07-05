@@ -1,3 +1,5 @@
+import { SessionDetailsComponent } from './sessions/session-details/session-details.component';
+import { SessionsComponent } from './sessions/sessions.component';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -9,7 +11,9 @@ import { HttpClientModule } from '@angular/common/http';
 @NgModule({
   declarations: [
     AppComponent,
-    MainComponent
+    MainComponent,
+    SessionsComponent,
+    SessionDetailsComponent
   ],
   imports: [
     BrowserModule,
