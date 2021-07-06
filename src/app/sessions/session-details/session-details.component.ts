@@ -90,19 +90,25 @@ export class SessionDetailsComponent implements OnInit, OnChanges {
   }
 
   createMap(center: L.LatLngTuple /*[31.673172684386373, 34.549383195117116]*/) {
-    let map = L.map('map').setView(
-      center,
-      18
-    );
 
-    L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-      maxZoom: 20,
-      subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-    }).addTo(map);
-
+    if (this.map == null) {
+      let map = L.map('map').setView(
+        center,
+        18
+      );
+      L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+      }).addTo(map);
+      this.map = map
+    }
+    else {
+      this.map!.setView(
+        center,
+        18
+      );
+    }
     // L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     // }).addTo(map);
-
-    this.map = map
   }
 }

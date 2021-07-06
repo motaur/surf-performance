@@ -32,7 +32,7 @@ export class SessionService {
   }
 
   getDownloadedSessions(): Observable<any> {
-    return this.httpClient.get(this.url + 'get_activities?login=' + this.login)
+    return this.httpClient.get(this.url + 'parse_activities?login=' + this.login)
   }
 
   garminConnect(login: string, password: string) {

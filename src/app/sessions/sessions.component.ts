@@ -30,8 +30,11 @@ export class SessionsComponent implements OnInit {
 
   ngOnInit() {
     this.sessionService.getDownloadedSessions().subscribe(res => {
-      this.sessions = (res as string[]).filter(s => s.length == 40)
-        .map(s => { return { date: s.substring(0, 25), id: s.substring(26, 36), format: s.substring(37, 40) } })
+      console.log(res) // testing session list as json
+
+      //parsing session as files name list
+      // this.sessions = (res as string[]).filter(s => s.length == 40)
+      //   .map(s => { return { date: s.substring(0, 25), id: s.substring(26, 36), format: s.substring(37, 40) } })
     })
   }
 }
